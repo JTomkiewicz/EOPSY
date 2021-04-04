@@ -34,11 +34,23 @@ do
             echo "-u   uppercase file names"
             echo "-h   display help"
             echo
+            # end program
+            exit
             ;;
         ?) 
             # other
-            echo "Unknown parameter. Use -h for help."
+            echo "Unknown option. Use -h for help."
             echo
+            # end program
+            exit
             ;;
     esac
 done
+
+# see if parameters are correct
+if $do_upper && $do_lower; then
+    echo "Incorrect options. Use -h for help."
+    echo
+    # end program
+    exit
+fi
