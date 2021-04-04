@@ -1,4 +1,30 @@
 #!/usr/local/bin/bash
 
-echo $BASH_VERSION
-echo "Hello, world!"
+while getopts :rluh option
+do 
+    case "${option}"
+        in
+        r) 
+            ;;
+        l) 
+            ;;
+        u) 
+            ;;
+        h) 
+            echo "Example usage:"
+            echo "modify [PARAMETERS] [SED PATTERN] <dir/file names...>"
+            echo "Script modifies file names."
+            echo 
+            echo "Parameters:"
+            echo "-r   use recursion"
+            echo "-l   lowerize file names"
+            echo "-u   uppercase file names"
+            echo "-h   display help"
+            echo
+            ;;
+        ?) 
+            echo "Unknown parameter. Use -h for help."
+            echo
+            ;;
+    esac
+done
