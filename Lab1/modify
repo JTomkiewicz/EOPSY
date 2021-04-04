@@ -19,7 +19,7 @@ do
             do_lower=true
             ;;
         u) 
-            #uppercase
+            #uppercasing
             do_upper=true
             ;;
         h) 
@@ -28,10 +28,10 @@ do
             echo "modify [OPTION] [SED PATTERN] <dir/file names...>"
             echo "Program modifies file names."
             echo 
-            echo "Option:"
+            echo "Options:"
             echo "-r   use recursion"
-            echo "-l   lowerize file names"
-            echo "-u   uppercase file names"
+            echo "-l   lowerizing file names"
+            echo "-u   uppercasing file names"
             echo "-h   display help"
             echo
             # end program
@@ -46,6 +46,9 @@ do
             ;;
     esac
 done
+
+# remove all options that have been parsed by getopts
+shift "$((OPTIND-1))"
 
 # see if parameters are correct
 if $do_upper && $do_lower; then
