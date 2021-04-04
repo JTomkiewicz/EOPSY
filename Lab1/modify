@@ -4,6 +4,7 @@
 do_recursion=false
 do_lower=false
 do_upper=false
+do_sed=true
 
 # get options from command line
 while getopts rluh option
@@ -17,10 +18,12 @@ do
         l) 
             # lowerizing
             do_lower=true
+            do_sed=false
             ;;
         u) 
             #uppercasing
             do_upper=true
+            do_sed=false
             ;;
         h) 
             #help
@@ -56,4 +59,13 @@ if $do_upper && $do_lower; then
     echo
     # end program
     exit
+fi
+
+# if sed pattern is needed, check if it exist
+if $do_sed; then 
+    if [ $# = 0 ]; then
+        echo "Missing sed pattern. Use -h for help."
+        echo
+        exit
+    fi 
 fi
