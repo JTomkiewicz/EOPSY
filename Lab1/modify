@@ -1,17 +1,29 @@
 #!/usr/local/bin/bash
 
+# default options
+do_recursion=false
+do_lower=false
+do_upper=false
+
 # get options from command line
-while getopts :rluh option
+while getopts rluh option
 do 
     case "${option}"
         in
         r) 
+            # recursion
+            do_recursion=true
             ;;
         l) 
+            # lowerizing
+            do_lower=true
             ;;
         u) 
+            #uppercase
+            do_upper=true
             ;;
         h) 
+            #help
             echo "Example usage:"
             echo "modify [OPTION] [SED PATTERN] <dir/file names...>"
             echo "Program modifies file names."
@@ -24,6 +36,7 @@ do
             echo
             ;;
         ?) 
+            # other
             echo "Unknown parameter. Use -h for help."
             echo
             ;;
