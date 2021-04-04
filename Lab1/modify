@@ -4,7 +4,7 @@
 do_recursion=false
 do_lower=false
 do_upper=false
-do_sed=true
+do_sed_pattern=true
 
 # get options from command line
 while getopts rluh option
@@ -18,12 +18,12 @@ do
         l) 
             # lowerizing
             do_lower=true
-            do_sed=false
+            do_sed_pattern=false
             ;;
         u) 
             #uppercasing
             do_upper=true
-            do_sed=false
+            do_sed_pattern=false
             ;;
         h) 
             #help
@@ -36,14 +36,12 @@ do
             echo "-l   lowerizing file names"
             echo "-u   uppercasing file names"
             echo "-h   display help"
-            echo
             # end program
             exit
             ;;
         ?) 
             # other
             echo "Unknown option. Use -h for help."
-            echo
             # end program
             exit
             ;;
@@ -56,16 +54,14 @@ shift "$((OPTIND-1))"
 # see if parameters are correct
 if $do_upper && $do_lower; then
     echo "Incorrect options. Use -h for help."
-    echo
     # end program
     exit
 fi
 
 # if sed pattern is needed, check if it exist
-if $do_sed; then 
+if $do_sed_pattern; then 
     if [ $# = 0 ]; then
         echo "Missing sed pattern. Use -h for help."
-        echo
         exit
     fi 
 
@@ -75,4 +71,12 @@ fi
 # internal field separator
 IFS=$'\n'
 
-for in "$@"
+# check if file exist
+for args in "$@"
+do 
+    # -e NOT -f, as we are looking for name regardless of the type
+    if [ ! -e "$args" ]; then
+		echo "Missing file. Use -h for help."
+		exit
+	fi
+done
