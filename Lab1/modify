@@ -80,3 +80,27 @@ do
 		exit
 	fi
 done
+
+# with recursion
+if $do_recursion; then
+    # with sed pattern
+    if $do_sed_pattern; then
+    
+        exit
+    # without sed
+    else
+
+        exit
+    fi
+#without recursion
+else
+    # with sed pattern
+    if $do_sed_pattern; then
+
+        exit
+    # without sed
+    else
+
+        exit
+    fi
+fi
