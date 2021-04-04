@@ -1,10 +1,10 @@
 #!/usr/local/bin/bash
 
 # default options
-do_recursion=false
-do_lower=false
-do_upper=false
-do_sed_pattern=true
+doRecursion=false
+doLower=false
+doUpper=false
+doSedPattern=true
 
 # get options from command line
 while getopts rluh option
@@ -13,17 +13,17 @@ do
         in
         r) 
             # recursion
-            do_recursion=true
+            doRecursion=true
             ;;
         l) 
             # lowerizing
-            do_lower=true
-            do_sed_pattern=false
+            doLower=true
+            doSedPattern=false
             ;;
         u) 
             #uppercasing
-            do_upper=true
-            do_sed_pattern=false
+            doUpper=true
+            doSedPattern=false
             ;;
         h) 
             #help
@@ -52,20 +52,20 @@ done
 shift "$((OPTIND-1))"
 
 # see if parameters are correct
-if $do_upper && $do_lower; then
-    echo "Incorrect options. Use -h for help."
-    # end program
+if $doUpper && $doLower; then
+    echo "Incorrect options used. Use -h for help."
     exit
 fi
 
 # if sed pattern is needed, check if it exist
-if $do_sed_pattern; then 
+if $doSedPattern; then 
     if [ $# = 0 ]; then
         echo "Missing sed pattern. Use -h for help."
         exit
     fi 
 
-    sed_pattern="$1"
+    sedPattern="$1"
+    shift
 fi
 
 # internal field separator
@@ -76,16 +76,16 @@ for args in "$@"
 do 
     # -e NOT -f, as we are looking for name regardless of the type
     if [ ! -e "$args" ]; then
-		echo "Missing file. Use -h for help."
+		echo "Missing file. Check input or use -h for help."
 		exit
 	fi
 done
 
 # with recursion
-if $do_recursion; then
+if $doRecursion; then
     # with sed pattern
-    if $do_sed_pattern; then
-    
+    if $doSedPattern; then
+
         exit
     # without sed
     else
@@ -95,12 +95,23 @@ if $do_recursion; then
 #without recursion
 else
     # with sed pattern
-    if $do_sed_pattern; then
+    if $doSedPattern; then
 
         exit
     # without sed
     else
+        for args in "$@"
+        do
+            # get dir and name of file
+            fileName="$(basename "$args")"
+            dirName="$(dirname "$args")"
 
+            if $doUpper; then
+
+            else 
+
+            fi
+        done
         exit
     fi
 fi
