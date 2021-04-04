@@ -64,7 +64,6 @@ if $doSedPattern; then
         exit
     fi 
 
-    sedPattern="$1"
     shift
 fi
 
@@ -96,7 +95,18 @@ if $doRecursion; then
 else
     # with sed pattern
     if $doSedPattern; then
+        for args in "$@"
+        do
+            # get dir and name of file
+            fileName="$(basename "$args")"
+            dirName="$(dirname "$args")"
 
+            # new name created with sed pattern
+            newFileName=$(echo "$fileName" | sed "$1")
+
+            # mv used to change names     
+            mv $args $dirName/$newFileName
+        done
         exit
     # without sed
     else
@@ -106,10 +116,11 @@ else
             fileName="$(basename "$args")"
             dirName="$(dirname "$args")"
 
+            # mv used to change names
             if $doUpper; then
-
+                mv $args $dirName/${fileName^^}
             else 
-
+                mv $args $dirName/${fileName,,}
             fi
         done
         exit
