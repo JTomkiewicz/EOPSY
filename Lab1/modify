@@ -68,4 +68,11 @@ if $do_sed; then
         echo
         exit
     fi 
+
+    sed_pattern="$1"
 fi
+
+# internal field separator
+IFS=$'\n'
+
+for in "$@"
