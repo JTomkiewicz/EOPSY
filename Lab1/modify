@@ -1,5 +1,6 @@
 #!/usr/local/bin/bash
 
+# get options from command line
 while getopts :rluh option
 do 
     case "${option}"
@@ -12,10 +13,10 @@ do
             ;;
         h) 
             echo "Example usage:"
-            echo "modify [PARAMETERS] [SED PATTERN] <dir/file names...>"
-            echo "Script modifies file names."
+            echo "modify [OPTION] [SED PATTERN] <dir/file names...>"
+            echo "Program modifies file names."
             echo 
-            echo "Parameters:"
+            echo "Option:"
             echo "-r   use recursion"
             echo "-l   lowerize file names"
             echo "-u   uppercase file names"
