@@ -51,6 +51,11 @@ done
 # remove all options that have been parsed by getopts
 shift "$((OPTIND-1))"
 
+if [ $# = 0 ]; then
+    echo "Missing parameters. Use -h for help."
+    exit
+fi
+
 # see if parameters are correct
 if $doUpper && $doLower; then
     echo "Incorrect options used. Use -h for help."
@@ -59,10 +64,17 @@ fi
 
 # if sed pattern is needed, check if it exist
 if $doSedPattern; then 
-    if [ $# = 0 ]; then
-        echo "Missing sed pattern. Use -h for help."
-        exit
-    fi 
+    if $doRecursion; then
+        if [ $# = 2 ]; then
+            echo "Missing sed pattern. Use -h for help."
+            exit
+        fi 
+    else 
+        if [ $# = 1 ]; then
+            echo "Missing sed pattern. Use -h for help."
+            exit
+        fi 
+    fi
 fi
 
 # internal field separator
@@ -73,7 +85,7 @@ for args in "$@"
 do 
     # -e NOT -f, as we are looking for name regardless of the type
     if [ ! -e "$args" ]; then
-		echo "Missing file $args. Check input or use -h for help."
+		echo "Missing file or folder $args. Check input or use -h for help."
 		exit
 	fi
 done
@@ -85,7 +97,7 @@ if $doRecursion; then
         for args in "$@"
         do
             # go throught files in directory
-            for file in $(find "$args" -type f )
+            for file in $(find "$args" -type f)
             do
                 # get dir and name of file
                 fileName="$(basename "$file")"
@@ -102,21 +114,24 @@ if $doRecursion; then
         exit
     # without sed
     else
-        # go throught files in directory
-        for file in $(find "$args" -type f )
+        for args in "$@"
         do
-            # get dir and name of file
-            fileName="$(basename "$file")"
-            dirName="$(dirname "$file")"
+            # go throught files in directory
+            for file in $(find "$args" -type f )
+            do
+                # get dir and name of file
+                fileName="$(basename "$file")"
+                dirName="$(dirname "$file")"
 
-            # mv used to change names depend from mode
-            if $doUpper; then
-                mv $file $dirName/${fileName^^}
-            else 
-                mv $file $dirName/${fileName,,}
-            fi
+                # mv used to change names depend from mode
+                if $doUpper; then
+                    mv $file $dirName/${fileName^^}
+                else 
+                    mv $file $dirName/${fileName,,}
+                fi
+            done
         done
-
+        
         exit
     fi
 #without recursion
