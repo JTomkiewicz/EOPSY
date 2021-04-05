@@ -64,17 +64,10 @@ fi
 
 # if sed pattern is needed, check if it exist
 if $doSedPattern; then 
-    if $doRecursion; then
-        if [ $# = 2 ]; then
-            echo "Missing sed pattern. Use -h for help."
-            exit
-        fi 
-    else 
-        if [ $# = 1 ]; then
-            echo "Missing sed pattern. Use -h for help."
-            exit
-        fi 
-    fi
+    if [ $# = 1 ]; then
+        echo "Missing sed pattern. Use -h for help."
+        exit
+    fi 
 fi
 
 # internal field separator
