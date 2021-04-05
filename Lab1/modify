@@ -21,12 +21,12 @@ do
             doSedPattern=false
             ;;
         u) 
-            #uppercasing
+            # uppercasing
             doUpper=true
             doSedPattern=false
             ;;
         h) 
-            #help
+            # help
             echo "Example usage:"
             echo "modify [OPTION] [SED PATTERN] <dir/file names...>"
             echo "Program modifies file names."
@@ -63,8 +63,6 @@ if $doSedPattern; then
         echo "Missing sed pattern. Use -h for help."
         exit
     fi 
-
-    shift
 fi
 
 # internal field separator
@@ -75,7 +73,7 @@ for args in "$@"
 do 
     # -e NOT -f, as we are looking for name regardless of the type
     if [ ! -e "$args" ]; then
-		echo "Missing file. Check input or use -h for help."
+		echo "Missing file $args. Check input or use -h for help."
 		exit
 	fi
 done
@@ -84,10 +82,40 @@ done
 if $doRecursion; then
     # with sed pattern
     if $doSedPattern; then
+        for args in "$@"
+        do
+            # go throught files in directory
+            for file in $(find "$args" -type f )
+            do
+                # get dir and name of file
+                fileName="$(basename "$file")"
+                dirName="$(dirname "$file")"
+
+                # new name created with sed pattern
+                newFileName=$(echo "$fileName" | sed "$1")
+
+                # mv used to change names     
+                mv $file $dirName/$newFileName
+            done
+        done
 
         exit
     # without sed
     else
+        # go throught files in directory
+        for file in $(find "$args" -type f )
+        do
+            # get dir and name of file
+            fileName="$(basename "$file")"
+            dirName="$(dirname "$file")"
+
+            # mv used to change names depend from mode
+            if $doUpper; then
+                mv $file $dirName/${fileName^^}
+            else 
+                mv $file $dirName/${fileName,,}
+            fi
+        done
 
         exit
     fi
@@ -97,7 +125,6 @@ else
     if $doSedPattern; then
         for args in "$@"
         do
-            # get dir and name of file
             fileName="$(basename "$args")"
             dirName="$(dirname "$args")"
 
@@ -107,22 +134,23 @@ else
             # mv used to change names     
             mv $args $dirName/$newFileName
         done
+
         exit
     # without sed
     else
         for args in "$@"
         do
-            # get dir and name of file
             fileName="$(basename "$args")"
             dirName="$(dirname "$args")"
 
-            # mv used to change names
+            # mv used to change names depend from mode
             if $doUpper; then
                 mv $args $dirName/${fileName^^}
             else 
                 mv $args $dirName/${fileName,,}
             fi
         done
+
         exit
     fi
 fi
