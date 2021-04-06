@@ -48,7 +48,7 @@ do
     esac
 done
 
-# remove all options that have been parsed by getopts
+# remove all options that have been parsed by getopts (options with -)
 shift "$((OPTIND-1))"
 
 if [ $# = 0 ]; then
@@ -70,7 +70,7 @@ if $doSedPattern; then
     fi 
 fi
 
-# internal field separator
+# internal field separator (needed for find function)
 IFS=$'\n'
 
 # check if file exist
@@ -89,7 +89,7 @@ if $doRecursion; then
     if $doSedPattern; then
         for args in "$@"
         do
-            # go throught files in directory
+            # go throught files in directory, "" are protection for space in names
             for file in $(find "$args" -type f)
             do
                 # get dir and name of file
@@ -110,7 +110,7 @@ if $doRecursion; then
         for args in "$@"
         do
             # go throught files in directory
-            for file in $(find "$args" -type f )
+            for file in $(find "$args" -type f)
             do
                 # get dir and name of file
                 fileName="$(basename "$file")"
