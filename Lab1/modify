@@ -68,6 +68,10 @@ if $doSedPattern; then
         echo "Missing sed pattern. Use -h for help."
         exit
     fi 
+
+    # we need to shift parameters and remember sed pattern as it will vanish 
+    rememberSed="$1"
+    shift
 fi
 
 # internal field separator (needed for find function)
@@ -97,7 +101,7 @@ if $doRecursion; then
                 dirName="$(dirname "$file")"
 
                 # new name created with sed pattern
-                newFileName=$(echo "$fileName" | sed "$1")
+                newFileName=$(echo "$fileName" | sed "$rememberSed")
 
                 # mv used to change names     
                 mv $file $dirName/$newFileName
@@ -137,7 +141,7 @@ else
             dirName="$(dirname "$args")"
 
             # new name created with sed pattern
-            newFileName=$(echo "$fileName" | sed "$1")
+            newFileName=$(echo "$fileName" | sed "$rememberSed")
 
             # mv used to change names     
             mv $args $dirName/$newFileName
