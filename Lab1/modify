@@ -94,7 +94,7 @@ if $doRecursion; then
         for args in "$@"
         do
             # go throught files in directory, "" are protection for space in names
-            for file in $(find "$args" -type f)
+            for file in $(find "$args")
             do
                 # get dir and name of file
                 fileName="$(basename "$file")"
@@ -114,7 +114,7 @@ if $doRecursion; then
         for args in "$@"
         do
             # go throught files in directory
-            for file in $(find "$args" -type f)
+            for file in $(find "$args")
             do
                 # get dir and name of file
                 fileName="$(basename "$file")"

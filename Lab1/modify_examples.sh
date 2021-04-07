@@ -119,7 +119,7 @@ waitForUser
 echo "TEST CASE 12: Lowerize files names using recursion"
 echo "Before modify: "
 find . -mindepth 2 -type f
-./modify -r -l "folderForTests"
+./modify -r -l "FOLDERFORTESTS"
 echo
 echo "After modify: "
 find . -mindepth 2 -type f
@@ -129,14 +129,14 @@ waitForUser
 echo "TEST CASE 13: Change files names with sed pattern s/ext/est/ and recursion"
 echo "Before modify: "
 find . -mindepth 2 -type f
-./modify -r "s/ext/est/" "folderForTests"
+./modify -r "s/ext/est/" "folderfortests"
 echo
 echo "After modify: "
 find . -mindepth 2 -type f
 waitForUser
 
 # remove folder with test data
-rm -r folderForTests
+rm -r folderfortests
 
 # END
 echo "#### #    #        ##### #### #### #### #### ####"
