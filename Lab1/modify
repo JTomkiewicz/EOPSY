@@ -104,7 +104,7 @@ if $doRecursion; then
                 newFileName=$(echo "$fileName" | sed "$rememberSed")
 
                 # mv used to change names     
-                mv $file $dirName/$newFileName
+                mv $file $dirName/$newFileName 2>/dev/null # hide warnings that occurs while testing
             done
         done
 
