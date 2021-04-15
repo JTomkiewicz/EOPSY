@@ -97,14 +97,14 @@ if $doRecursion; then
             for file in $(find "$args")
             do
                 # get dir and name of file
-                fileName="$(basename "$file")"
-                dirName="$(dirname "$file")"
+                fileName="$(basename -- "$file")"
+                dirName="$(dirname -- "$file")"
 
                 # new name created with sed pattern
                 newFileName=$(echo "$fileName" | sed "$rememberSed")
 
                 # mv used to change names     
-                mv $file $dirName/$newFileName 2>/dev/null # hide warnings that occurs while testing
+                mv -- $file $dirName/$newFileName 2>/dev/null # hide warnings that occurs while testing
             done
         done
 
@@ -117,14 +117,14 @@ if $doRecursion; then
             for file in $(find "$args")
             do
                 # get dir and name of file
-                fileName="$(basename "$file")"
-                dirName="$(dirname "$file")"
+                fileName="$(basename -- "$file")"
+                dirName="$(dirname -- "$file")"
 
                 # mv used to change names depend from mode
                 if $doUpper; then
-                    mv $file $dirName/${fileName^^}
+                    mv -- $file $dirName/${fileName^^} 2>/dev/null # hide warnings that occurs while testing
                 else 
-                    mv $file $dirName/${fileName,,}
+                    mv -- $file $dirName/${fileName,,} 2>/dev/null # hide warnings that occurs while testing
                 fi
             done
         done
@@ -137,14 +137,14 @@ else
     if $doSedPattern; then
         for args in "$@"
         do
-            fileName="$(basename "$args")"
-            dirName="$(dirname "$args")"
+            fileName="$(basename -- "$args")"
+            dirName="$(dirname -- "$args")"
 
             # new name created with sed pattern
             newFileName=$(echo "$fileName" | sed "$rememberSed")
 
             # mv used to change names     
-            mv $args $dirName/$newFileName
+            mv -- $args $dirName/$newFileName 2>/dev/null # hide warnings that occurs while testing
         done
 
         exit
@@ -152,14 +152,14 @@ else
     else
         for args in "$@"
         do
-            fileName="$(basename "$args")"
-            dirName="$(dirname "$args")"
+            fileName="$(basename -- "$args")"
+            dirName="$(dirname -- "$args")"
 
             # mv used to change names depend from mode
             if $doUpper; then
-                mv $args $dirName/${fileName^^}
+                mv -- $args $dirName/${fileName^^} 2>/dev/null # hide warnings that occurs while testing
             else 
-                mv $args $dirName/${fileName,,}
+                mv -- $args $dirName/${fileName,,} 2>/dev/null # hide warnings that occurs while testing
             fi
         done
 
