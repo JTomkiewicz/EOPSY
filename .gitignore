@@ -1,3 +1,4 @@
 *.txt
 *.TXT
 .DS_Store
+*.out
