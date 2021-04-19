@@ -19,12 +19,17 @@ pid_t childrenArray[NUM_CHILD];
 
 
 
+//sigterm handler function
+void sigtermHandler() {
+    printf("child[%d]: terminating\n", getpid());
+}
+
 //kill children func
 void killChildren(int id) {
 
     // loop to kill all children
-    for(int i = id; i > 0; i--) {
-        //send SIGTERM to children
+    for(int i = 0; i < id; i++) {
+        //send SIGTERM to child
         kill(childrenArray[i], SIGTERM);
     }
 }
@@ -52,12 +57,20 @@ void createChild(int id) {
         //print msg with parent pid
         printf("child[%d]: pid of my parent is %d\n", getpid(), getppid());
 
+        //my own handler of the SIGTERM signal & ignore keyboard interuptions
+        #ifdef WITH_SIGNALS
+            signal(SIGTERM, sigtermHandler());
+
+            signal(SIGINT, SIG_IGN);
+        #endif
+
         //sleep for 10s
         sleep(10);
 
         //print msg execution competition
         printf("child[%d]: execution completed\n", getpid());
 
+        //exit code 0
         exit(0);
 
     } else { //positive = child created & returned to parent
@@ -81,6 +94,25 @@ int main() {
         //sleep for 1s
         sleep(1);
     }
+
+    printf("parent[%d]: all child processes created\n", getpid());
+
+    int childTerminations = 0;
+
+    //infinite loop
+    while(true) {
+        if(wait(NULL) == -1) { //-1 if no process has any child processes
+
+            printf("parent[%d]: there are no more child processes\n", getpid());
+            //break the loop
+            break;
+        }
+        //nr of killed children + 1
+        childTerminations++;
+    }
+    
+    printf("parent[#d]: %d terminations performed\n", getpid(), childTerminations);
+
 
     return 0;
 }
