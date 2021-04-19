@@ -17,9 +17,20 @@ int nrOfChildren = 0;
 //array of children processes pids
 pid_t childrenArray[NUM_CHILD];
 
+//global var to see if keyboard interrupt occurance appeared
+bool keyboardInterruptOccurance = false;
 
 
-//sigterm handler function
+
+//sigint handler func
+void sigintHandler() {
+    //interrupt appeared
+    keyboardInterruptOccurance = false;
+    
+    printf("parent[%d]: received keyboard interrupt\n",getpid());
+}
+
+//sigterm handler func
 void sigtermHandler() {
     printf("child[%d]: terminating\n", getpid());
 }
@@ -59,7 +70,7 @@ void createChild(int id) {
 
         //my own handler of the SIGTERM signal & ignore keyboard interuptions
         #ifdef WITH_SIGNALS
-            signal(SIGTERM, sigtermHandler());
+            signal(SIGTERM, sigtermHandler);
 
             signal(SIGINT, SIG_IGN);
         #endif
@@ -87,20 +98,43 @@ int main() {
     //print msg that parent created
     printf("parent[%d]: process created\n", getpid());
 
+    #ifdef WITH_SIGNALS
+        //own signal interrupt handler
+        signal(SIGINT, sigintHandler);
+
+        signal(SIGCHLD, SIG_DFL); //sigchld reset to default
+    #endif
+
     //create children
     for(int i = 0; i < NUM_CHILD; i++) {
         
         createChild(i);
         //sleep for 1s
         sleep(1);
+
+        #ifdef WITH_SIGNALS
+            //keyboard interrupt is set
+            if(keyboardInterruptOccurance) {
+                //signal children with SIGTERM
+                killChildren(i);
+
+                //continue to wait's loop
+                break;
+            }
+        #endif
     }
 
-    printf("parent[%d]: all child processes created\n", getpid());
+    //if keyboard interrupt msg that
+    if(keyboardInterruptOccurance) {
+        printf("parent[%d]: interrupt of child creation\n", getpid());
+    } else {
+        printf("parent[%d]: all child processes created\n", getpid());
+    }
 
     int childTerminations = 0;
 
     //infinite loop
-    while(true) {
+    while(1) {
         if(wait(NULL) == -1) { //-1 if no process has any child processes
 
             printf("parent[%d]: there are no more child processes\n", getpid());
@@ -111,8 +145,12 @@ int main() {
         childTerminations++;
     }
     
-    printf("parent[#d]: %d terminations performed\n", getpid(), childTerminations);
+    printf("parent[%d]: %d terminations performed\n", getpid(), childTerminations);
 
+    //restore all signals to default
+    #ifdef WITH_SIGNALS
+
+    #endif
 
     return 0;
 }
