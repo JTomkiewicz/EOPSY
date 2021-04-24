@@ -37,7 +37,6 @@ void sigtermHandler() {
 
 //kill children func
 void killChildren(int id) {
-
     // loop to kill all children
     for(int i = 0; i <= id; i++) {
         //send SIGTERM to child
@@ -55,10 +54,8 @@ void createChild(int id) {
         //print msg about creation failure
         printf("parent[%d]: child process creation failure, killing children and exiting\n", getpid());
 
-        //killing children
-        #ifdef WITH_SIGNALS
-            killChildren(id);
-        #endif
+        //kill children
+        killChildren(id);
 
         //exit with code 1
         exit(1);
@@ -97,6 +94,18 @@ void createChild(int id) {
     }
 }
 
+#ifdef WITH_SIGNALS
+//restore signals to default func
+void restoreAllSignalsDefault() {
+    //loop for all signals
+    for(int i=0; i <  NSIG; i++) {
+        signal(i, SIG_DFL);
+    }
+
+    printf("parent[%d]: signals restored to default\n", getpid());
+}
+#endif
+
 int main() {
     
     //print msg that parent created
@@ -128,16 +137,17 @@ int main() {
         #endif
     }
 
-    //if keyboard interrupt msg that
+    //if keyboard interrupt occured msg that
     if(keyboardInterruptOccurance == 1) {
-        printf("parent[%d]: interrupt of child creation\n", getpid());
+        printf("parent[%d]: child creation has been interrupted\n", getpid());
     } else {
         printf("parent[%d]: all child processes created\n", getpid());
     }
 
+    //integer to count child terminations
     int childTerminations = 0;
 
-    //infinite loop
+    //infinite loop untill processes are running
     while(1) {
         if(wait(NULL) == -1) { //-1 if no process has any child processes
 
@@ -151,14 +161,9 @@ int main() {
     
     printf("parent[%d]: %d terminations performed\n", getpid(), childTerminations);
 
-    //restore all signals to default
     #ifdef WITH_SIGNALS
-            //loop for all signals
-            for(int i=0; i <  NSIG; i++) {
-                signal(i, SIG_DFL);
-            }
-
-        printf("parent[%d]: signals restored to default\n", getpid());
+        //restore all signals to default
+        restoreAllSignalsDefault();
     #endif
 
     return 0;
