@@ -6,8 +6,6 @@
 
 
 
-//with or without signals
-#define WITH_SIGNALS
 //nr of child processes
 #define NUM_CHILD 6
 
@@ -18,14 +16,14 @@ int nrOfChildren = 0;
 pid_t childrenArray[NUM_CHILD];
 
 //global var to see if keyboard interrupt occurance appeared
-bool keyboardInterruptOccurance = false;
+int keyboardInterruptOccurance = 0;
 
 
 
 //sigint handler func
 void sigintHandler() {
     //interrupt appeared
-    keyboardInterruptOccurance = false;
+    keyboardInterruptOccurance = 1;
     
     printf("parent[%d]: received keyboard interrupt\n",getpid());
 }
@@ -33,13 +31,15 @@ void sigintHandler() {
 //sigterm handler func
 void sigtermHandler() {
     printf("child[%d]: terminating\n", getpid());
+
+    exit(0);
 }
 
 //kill children func
 void killChildren(int id) {
 
     // loop to kill all children
-    for(int i = 0; i < id; i++) {
+    for(int i = 0; i <= id; i++) {
         //send SIGTERM to child
         kill(childrenArray[i], SIGTERM);
     }
@@ -70,9 +70,13 @@ void createChild(int id) {
 
         //my own handler of the SIGTERM signal & ignore keyboard interuptions
         #ifdef WITH_SIGNALS
-            signal(SIGTERM, sigtermHandler);
 
-            signal(SIGINT, SIG_IGN);
+            //ignore all other signals
+            for(int i=0; i <  NSIG; i++) {
+                signal(i, SIG_IGN);
+            }
+
+            signal(SIGTERM, sigtermHandler);
         #endif
 
         //sleep for 10s
@@ -114,7 +118,7 @@ int main() {
 
         #ifdef WITH_SIGNALS
             //keyboard interrupt is set
-            if(keyboardInterruptOccurance) {
+            if(keyboardInterruptOccurance == 1) {
                 //signal children with SIGTERM
                 killChildren(i);
 
@@ -125,7 +129,7 @@ int main() {
     }
 
     //if keyboard interrupt msg that
-    if(keyboardInterruptOccurance) {
+    if(keyboardInterruptOccurance == 1) {
         printf("parent[%d]: interrupt of child creation\n", getpid());
     } else {
         printf("parent[%d]: all child processes created\n", getpid());
@@ -137,7 +141,7 @@ int main() {
     while(1) {
         if(wait(NULL) == -1) { //-1 if no process has any child processes
 
-            printf("parent[%d]: there are no more child processes\n", getpid());
+            printf("parent[%d]: there are no more child processes running\n", getpid());
             //break the loop
             break;
         }
@@ -149,7 +153,12 @@ int main() {
 
     //restore all signals to default
     #ifdef WITH_SIGNALS
+            //loop for all signals
+            for(int i=0; i <  NSIG; i++) {
+                signal(i, SIG_DFL);
+            }
 
+        printf("parent[%d]: signals restored to default\n", getpid());
     #endif
 
     return 0;
