@@ -25,7 +25,7 @@ void sigintHandler() {
     //interrupt appeared
     keyboardInterruptOccurance = 1;
     
-    printf("parent[%d]: received keyboard interrupt\n",getpid());
+    printf("parent[%d]: received keyboard interrupt\n", getpid());
 }
 
 //sigterm handler func
@@ -37,7 +37,7 @@ void sigtermHandler() {
 
 //kill children func
 void killChildren(int id) {
-    // loop to kill all children
+    //loop to kill all children
     for(int i = 0; i <= id; i++) {
         //send SIGTERM to child
         kill(childrenArray[i], SIGTERM);
@@ -65,21 +65,20 @@ void createChild(int id) {
         //print msg with parent pid
         printf("child[%d]: pid of my parent is %d\n", getpid(), getppid());
 
-        //my own handler of the SIGTERM signal & ignore keyboard interuptions
         #ifdef WITH_SIGNALS
+        //ignore all other signals
+        for(int i = 0; i < NSIG; i++) {
+            signal(i, SIG_IGN);
+        }
 
-            //ignore all other signals
-            for(int i=0; i <  NSIG; i++) {
-                signal(i, SIG_IGN);
-            }
-
-            signal(SIGTERM, sigtermHandler);
+        //my own handler of the SIGTERM signal
+        signal(SIGTERM, sigtermHandler);
         #endif
 
         //sleep for 10s
         sleep(10);
 
-        //print msg execution competition
+        //print msg execution completion
         printf("child[%d]: execution completed\n", getpid());
 
         //exit code 0
@@ -98,7 +97,7 @@ void createChild(int id) {
 //restore signals to default func
 void restoreAllSignalsDefault() {
     //loop for all signals
-    for(int i=0; i <  NSIG; i++) {
+    for(int i = 0; i <  NSIG; i++) {
         signal(i, SIG_DFL);
     }
 
@@ -115,25 +114,26 @@ int main() {
         //own signal interrupt handler
         signal(SIGINT, sigintHandler);
 
-        signal(SIGCHLD, SIG_DFL); //sigchld reset to default
+        //restore sigchld to default handler
+        signal(SIGCHLD, SIG_DFL); 
     #endif
 
     //create children
     for(int i = 0; i < NUM_CHILD; i++) {
         
         createChild(i);
-        //sleep for 1s
+        //1s delay between fork calls
         sleep(1);
 
         #ifdef WITH_SIGNALS
-            //keyboard interrupt is set
-            if(keyboardInterruptOccurance == 1) {
-                //signal children with SIGTERM
-                killChildren(i);
+        //keyboard interrupt appeared
+        if(keyboardInterruptOccurance == 1) {
+            //signal children with SIGTERM
+            killChildren(i);
 
-                //continue to wait's loop
-                break;
-            }
+            //no more children
+            break;
+        }
         #endif
     }
 
@@ -145,7 +145,7 @@ int main() {
     }
 
     //integer to count child terminations
-    int childTerminations = 0;
+    int countChildTerminations = 0;
 
     //infinite loop untill processes are running
     while(1) {
@@ -156,14 +156,14 @@ int main() {
             break;
         }
         //nr of killed children + 1
-        childTerminations++;
+        countChildTerminations++;
     }
     
-    printf("parent[%d]: %d terminations performed\n", getpid(), childTerminations);
+    printf("parent[%d]: %d child processes exit codes received\n", getpid(), countChildTerminations);
 
     #ifdef WITH_SIGNALS
-        //restore all signals to default
-        restoreAllSignalsDefault();
+    //restore all signals to default
+    restoreAllSignalsDefault();
     #endif
 
     return 0;
