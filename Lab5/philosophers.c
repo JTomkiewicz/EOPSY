@@ -27,6 +27,16 @@ void killPhilosophers(int id) {
     }
 }
 
+//print msg that philosopher is thinking
+void msgThink() {
+
+}
+
+//print msg that philosopher is eating
+void msgEat() {
+
+}
+ 
 int main() {
 
     for(int i = 0; i < NUM_PHIL; i++) {
@@ -36,7 +46,7 @@ int main() {
         if(pid <= -1) { //negative = child process creation failed
 
             //print msg about creation failure
-            printf("main[%d]: philosopher process creation failure, killing philosophers and exiting\n", getpid());
+            printf("main[%d]: philosopher %d process creation failure, killing philosophers and exiting\n", getpid(), i);
 
             //kill philosophers
             killPhilosophers(i);
@@ -46,9 +56,14 @@ int main() {
 
         } else if(pid == 0) { //0 = child created & returned to child process
 
+            //exit code 0
+            exit(0);
+
         } else { //positive = child created & returned to parent
+            
             //remember philosopher id
-            philosophersArray[id] = pid;
+            philosophersArray[i] = pid;
+            
         }
     }
 
