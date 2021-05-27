@@ -104,7 +104,7 @@ int main()
     //set up semaphores
     for (int i = 0; i < NUM_PHIL; i++)
     {
-        //value to one
+        //value set to one
         if (semctl(semaphoreKey, i, SETVAL, 1) == -1)
         {
             printf("main: Error during semctl\n");
@@ -145,7 +145,7 @@ int main()
 
                 eating(i);
 
-                printf("philosopher[%d]: Trying to put away forks\n", i);
+                printf("philosopher[%d]: I'm full. Trying to put away forks\n", i);
                 put_away_forks(i);
             }
 
