@@ -11,19 +11,59 @@
 #include <sys/sem.h>
 
 #define NUM_PHIL 5
-#define LEFT (philoId + 4) % NUM_PHIL
-#define RIGHT (philoId + 1) % NUM_PHIL
+
+//time manipulation
+#define BEGIN_TIME 2
+#define THINK_TIME 2
+#define EAT_TIME 2
 
 //array of philosophers pids
 pid_t philosophersArray[NUM_PHIL];
 
+//semaphores key by default set to error state
+int semaphoreKey = -1;
+
 // FUNCTIONS //
 void grab_forks(int left_fork_id)
 {
+    struct sembuf operation[2];
+
+    //two forks for philosopher
+    operation[0].sem_num = left_fork_id;
+    operation[1].sem_num = (left_fork_id + 1) % NUM_PHIL;
+
+    operation[0].sem_op = -1;
+    operation[1].sem_op = -1;
+
+    //no additional flags
+    operation[0].sem_flg = 0;
+    operation[1].sem_flg = 0;
+
+    if (semop(semaphoreKey, operation, 2) == -1)
+    {
+        printf("Error: semop error in grab_forks\n");
+    }
 }
 
 void put_away_forks(int left_fork_id)
 {
+    struct sembuf operation[2];
+
+    //two forks for philosopher
+    operation[0].sem_num = left_fork_id;
+    operation[1].sem_num = (left_fork_id + 1) % NUM_PHIL;
+
+    operation[0].sem_op = 1;
+    operation[1].sem_op = 1;
+
+    //no additional flags
+    operation[0].sem_flg = 0;
+    operation[1].sem_flg = 0;
+
+    if (semop(semaphoreKey, operation, 2) == -1)
+    {
+        printf("Error: semop error in put_away_forks\n");
+    }
 }
 
 void killPhilosophers(int id) //kill existing philosophers
@@ -38,14 +78,14 @@ void killPhilosophers(int id) //kill existing philosophers
 
 void thinking(int id) //print msg that philosopher is thinking
 {
-    printf("philosopher[%d]: thinking\n", i);
-    sleep(1);
+    printf("philosopher[%d]: thinking\n", id);
+    sleep(THINK_TIME);
 }
 
 void eating(int id) //print msg that philosopher is eating
 {
-    printf("philosopher[%d]: eating\n", i);
-    sleep(2);
+    printf("philosopher[%d]: eating\n", id);
+    sleep(EAT_TIME);
 }
 
 // MAIN //
@@ -67,7 +107,7 @@ int main()
         //value to one
         if (semctl(semaphoreKey, i, SETVAL, 1) == -1)
         {
-            printf("main: Error during semctl");
+            printf("main: Error during semctl\n");
             exit(1);
         }
     }
@@ -82,7 +122,7 @@ int main()
         {
 
             //print msg about creation failure
-            printf("main: philosopher %d process creation failure, killing philosophers and exiting\n", getpid(), i);
+            printf("main: philosopher %d process creation failure, killing philosophers and exiting\n", i);
 
             //kill philosophers
             killPhilosophers(i);
@@ -92,20 +132,20 @@ int main()
         }
         else if (pid == 0) //0 = child created & returned to child process
         {
-            printf("philosopher[%d]: I'm alive", i);
+            printf("philosopher[%d]: I'm alive\n", i);
 
-            sleep(2); //sleep for 2 sec after init
+            sleep(BEGIN_TIME); //sleep for 2 sec after init
 
             while (1) //go throught the loop of philosopher destiny
             {
                 thinking(i);
 
-                printf("philosopher[%d]: Trying to get forks\n");
+                printf("philosopher[%d]: Trying to get forks\n", i);
                 grab_forks(i);
 
                 eating(i);
 
-                printf("philosopher[%d]: Trying to put away forks\n");
+                printf("philosopher[%d]: Trying to put away forks\n", i);
                 put_away_forks(i);
             }
 
