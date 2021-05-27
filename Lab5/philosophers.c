@@ -39,19 +39,40 @@ void killPhilosophers(int id) //kill existing philosophers
 void thinking(int id) //print msg that philosopher is thinking
 {
     printf("philosopher[%d]: thinking\n", i);
-    sleep(0);
+    sleep(1);
 }
 
 void eating(int id) //print msg that philosopher is eating
 {
     printf("philosopher[%d]: eating\n", i);
-    sleep(1);
+    sleep(2);
 }
 
 // MAIN //
 int main()
 {
+    //create semaphore key
+    semaphoreKey = semget(IPC_PRIVATE, NUM_PHIL, 0644 | IPC_CREAT);
 
+    //check if error occured
+    if (semaphoreKey == -1)
+    {
+        printf("main: Error duting semger\n");
+        exit(1);
+    }
+
+    //set up semaphores
+    for (int i = 0; i < NUM_PHIL; i++)
+    {
+        //value to one
+        if (semctl(semaphoreKey, i, SETVAL, 1) == -1)
+        {
+            printf("main: Error during semctl");
+            exit(1);
+        }
+    }
+
+    // create philosophers
     for (int i = 0; i < NUM_PHIL; i++)
     {
 
@@ -61,7 +82,7 @@ int main()
         {
 
             //print msg about creation failure
-            printf("main[%d]: philosopher %d process creation failure, killing philosophers and exiting\n", getpid(), i);
+            printf("main: philosopher %d process creation failure, killing philosophers and exiting\n", getpid(), i);
 
             //kill philosophers
             killPhilosophers(i);
@@ -71,12 +92,20 @@ int main()
         }
         else if (pid == 0) //0 = child created & returned to child process
         {
+            printf("philosopher[%d]: I'm alive", i);
+
+            sleep(2); //sleep for 2 sec after init
 
             while (1) //go throught the loop of philosopher destiny
             {
                 thinking(i);
+
+                printf("philosopher[%d]: Trying to get forks\n");
                 grab_forks(i);
+
                 eating(i);
+
+                printf("philosopher[%d]: Trying to put away forks\n");
                 put_away_forks(i);
             }
             //exit code 0
@@ -84,7 +113,6 @@ int main()
         }
         else //positive = child created & returned to parent
         {
-
             //remember philosopher id
             philosophersArray[i] = pid;
         }
