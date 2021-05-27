@@ -108,6 +108,7 @@ int main()
                 printf("philosopher[%d]: Trying to put away forks\n");
                 put_away_forks(i);
             }
+
             //exit code 0
             exit(0);
         }
@@ -115,6 +116,17 @@ int main()
         {
             //remember philosopher id
             philosophersArray[i] = pid;
+        }
+    }
+
+    //infinite loop untill processes are running
+    while (1)
+    {
+        if (wait(NULL) == -1) //-1 if no process has any child processes
+        {
+            printf("main: there are no more philosophers alive\n");
+            //break the loop
+            break;
         }
     }
 
