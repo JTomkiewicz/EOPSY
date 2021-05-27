@@ -136,6 +136,8 @@ int main()
 
             sleep(BEGIN_TIME); //sleep for 2 sec after init
 
+            int countMeals = 0;
+
             while (1) //go throught the loop of philosopher destiny
             {
                 thinking(i);
@@ -144,8 +146,9 @@ int main()
                 grab_forks(i);
 
                 eating(i);
+                countMeals++;
 
-                printf("philosopher[%d]: I'm full. Trying to put away forks\n", i);
+                printf("philosopher[%d]: Ate %d meals. Trying to put away forks\n", i, countMeals);
                 put_away_forks(i);
             }
 
