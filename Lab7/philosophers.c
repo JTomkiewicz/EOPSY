@@ -25,6 +25,10 @@ void put_away_forks(int philo_id)
 {
 }
 
+void *philosopher(void *number)
+{
+}
+
 // MAIN //
 int main()
 {
@@ -45,6 +49,31 @@ int main()
     //create philosophers
     for (int i = 0; i < NUM_PHIL; i++)
     {
+        if (pthread_create(&philoThreads[i], NULL, philosopher, (void *)i))
+        {
+            printf("main: Error occured while creating threads\n");
+            exit(1);
+        }
+    }
+
+    //join threads
+    for (int i = 0; i < NUM_PHIL; i++)
+    {
+        if (pthread_join(philoThreads[i], NULL))
+        {
+            printf("main: Error occured while joining threads\n");
+            exit(1);
+        }
+    }
+
+    //destroy mutexes
+    for (int i = 0; i < NUM_PHIL; i++)
+    {
+        if (pthread_mutex_destroy(&mutexForFork[i]))
+        {
+            printf("main: Error occured while mutex destruction\n");
+            exit(1);
+        }
     }
 
     return 0;
