@@ -22,6 +22,8 @@ pthread_mutex_t mutex; //mutex locker
 
 pthread_mutex_t mutexForFork[NUM_PHIL];
 
+int canBeLocked[NUM_PHIL] = {0};
+
 struct philoStruct
 {
     int id;
@@ -38,12 +40,21 @@ void grab_forks(int philo_id)
         //if success of locking right
         if (pthread_mutex_trylock(&mutexForFork[(philo_id + 1) % NUM_PHIL]) == 0)
         {
+            canBeLocked[philo_id] = 1;
         }
         else
         {
             pthread_mutex_unlock(&mutexForFork[philo_id]);
+
+            canBeLocked[philo_id] = 0;
         }
     }
+    else
+    {
+        canBeLocked[philo_id] = 0;
+    }
+
+    pthread_mutex_unlock(&mutex);
 }
 
 void put_away_forks(int philo_id)
@@ -86,11 +97,14 @@ void *philosopher(void *philoFromMain)
         printf("philosopher[%d]: Trying to get forks\n", id);
         grab_forks(id);
 
-        eating(id);
-        countMeals++;
+        if (canBeLocked[id] == 1)
+        {
+            eating(id);
+            countMeals++;
 
-        printf("philosopher[%d]: Ate %d meals. Trying to put away forks\n", id, countMeals);
-        put_away_forks(id);
+            printf("philosopher[%d]: Ate %d meals. Trying to put away forks\n", id, countMeals);
+            put_away_forks(id);
+        }
     }
 
     pthread_cancel(philoThreads[id]);
