@@ -16,28 +16,80 @@
 #define THINK_TIME 2
 #define EAT_TIME 2
 
+pthread_t philoThreads[NUM_PHIL]; //thread identifiers
+
+pthread_mutex_t mutex; //mutex locker
+
+pthread_mutex_t mutexForFork[NUM_PHIL];
+
 // FUNCTIONS //
 void grab_forks(int philo_id)
 {
+    pthread_mutex_lock(&mutex);
+
+    //if success of locking left
+    if (pthread_mutex_trylock(&mutexForFork[philo_id]) == 0)
+    {
+        //if success of locking right
+        if (pthread_mutex_trylock(&mutexForFork[(philo_id + 1) % NUM_PHIL]) == 0)
+        {
+        }
+        else
+        {
+            pthread_mutex_unlock(&mutexForFork[philo_id]);
+        }
+    }
 }
 
 void put_away_forks(int philo_id)
 {
+    //left
+    pthread_mutex_unlock(&mutexForFork[philo_id]);
+
+    //right
+    pthread_mutex_unlock(&mutexForFork[(philo_id + 1) % NUM_PHIL]);
 }
 
-void *philosopher(void *number)
+void thinking(int id) //print msg that philosopher is thinking
 {
+    printf("philosopher[%d]: thinking\n", id);
+    sleep(THINK_TIME);
+}
+
+void eating(int id) //print msg that philosopher is eating
+{
+    printf("philosopher[%d]: eating\n", id);
+    sleep(EAT_TIME);
+}
+
+void *philosopher(void *id)
+{
+    printf("philosopher[%d]: I'm alive\n", id);
+
+    sleep(BEGIN_TIME);
+
+    int countMeals = 0;
+
+    while (1)
+    {
+        thinking(id);
+
+        printf("philosopher[%d]: Trying to get forks\n", id);
+        grab_forks(id);
+
+        eating(id);
+        countMeals++;
+
+        printf("philosopher[%d]: Ate %d meals. Trying to put away forks\n", id, countMeals);
+        put_away_forks(id);
+    }
+
+    pthread_cancel(philoThreads[id]);
 }
 
 // MAIN //
 int main()
 {
-    pthread_t philoThreads[NUM_PHIL]; //thread identifiers
-
-    pthread_mutex_t mutex; //mutex locker
-
-    pthread_mutex_t mutexForFork[NUM_PHIL];
-
     //init mutex lock
     pthread_mutex_init(&mutex, NULL);
 
@@ -49,7 +101,7 @@ int main()
     //create philosophers
     for (int i = 0; i < NUM_PHIL; i++)
     {
-        if (pthread_create(&philoThreads[i], NULL, philosopher, (void *)i))
+        if (pthread_create(&philoThreads[i], NULL, philosopher, &i))
         {
             printf("main: Error occured while creating threads\n");
             exit(1);
@@ -69,7 +121,7 @@ int main()
     //destroy mutexes
     for (int i = 0; i < NUM_PHIL; i++)
     {
-        if (pthread_mutex_destroy(&mutexForFork[i]))
+        if (pthread_mutex_destroy(&mutexForFork[i]) == -1)
         {
             printf("main: Error occured while mutex destruction\n");
             exit(1);
