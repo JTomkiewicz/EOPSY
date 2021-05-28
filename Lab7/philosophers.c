@@ -11,10 +11,10 @@
 
 #define NUM_PHIL 5
 
-//time manipulation
-#define BEGIN_TIME 2
-#define THINK_TIME 2
-#define EAT_TIME 2
+//time manipulation (values in sec)
+int beginTime = 2;
+int thinkTime = 2;
+int eatTime = 2;
 
 pthread_t philoThreads[NUM_PHIL]; //thread identifiers
 
@@ -22,8 +22,10 @@ pthread_mutex_t mutex; //mutex locker
 
 pthread_mutex_t mutexForFork[NUM_PHIL];
 
+//int that can be 1 (if fork can be locked) and 0 (if not)
 int canBeLocked[NUM_PHIL] = {0};
 
+//this is the philosopher structure
 struct philoStruct
 {
     int id;
@@ -32,6 +34,7 @@ struct philoStruct
 // FUNCTIONS //
 void grab_forks(int philo_id)
 {
+    //lock mutex
     pthread_mutex_lock(&mutex);
 
     //if success of locking left
@@ -40,20 +43,25 @@ void grab_forks(int philo_id)
         //if success of locking right
         if (pthread_mutex_trylock(&mutexForFork[(philo_id + 1) % NUM_PHIL]) == 0)
         {
+            //YES! philosopher can eat
             canBeLocked[philo_id] = 1;
         }
         else
         {
+            //right is busy, release left
             pthread_mutex_unlock(&mutexForFork[philo_id]);
 
+            //NO :( philosopher must think
             canBeLocked[philo_id] = 0;
         }
     }
     else
     {
+        //NO :( philosopher must think
         canBeLocked[philo_id] = 0;
     }
 
+    //unlock mutex
     pthread_mutex_unlock(&mutex);
 }
 
@@ -69,13 +77,14 @@ void put_away_forks(int philo_id)
 void thinking(int id) //print msg that philosopher is thinking
 {
     printf("philosopher[%d]: thinking\n", id);
-    sleep(THINK_TIME);
+    sleep(thinkTime);
 }
 
 void eating(int id) //print msg that philosopher is eating
 {
     printf("philosopher[%d]: eating\n", id);
-    sleep(EAT_TIME);
+    sleep(eatTime);
+    ;
 }
 
 void *philosopher(void *philoFromMain)
@@ -86,7 +95,7 @@ void *philosopher(void *philoFromMain)
 
     printf("philosopher[%d]: I'm alive\n", id);
 
-    sleep(BEGIN_TIME);
+    sleep(beginTime);
 
     int countMeals = 0;
 

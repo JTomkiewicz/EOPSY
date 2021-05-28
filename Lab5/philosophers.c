@@ -12,10 +12,10 @@
 
 #define NUM_PHIL 5
 
-//time manipulation
-#define BEGIN_TIME 2
-#define THINK_TIME 2
-#define EAT_TIME 2
+//time manipulation (values in sec)
+int beginTime = 2;
+int thinkTime = 2;
+int eatTime = 2;
 
 //array of philosophers pids
 pid_t philosophersArray[NUM_PHIL];
@@ -79,13 +79,13 @@ void killPhilosophers(int id) //kill existing philosophers
 void thinking(int id) //print msg that philosopher is thinking
 {
     printf("philosopher[%d]: thinking\n", id);
-    sleep(THINK_TIME);
+    sleep(thinkTime);
 }
 
 void eating(int id) //print msg that philosopher is eating
 {
     printf("philosopher[%d]: eating\n", id);
-    sleep(EAT_TIME);
+    sleep(eatTime);
 }
 
 // MAIN //
@@ -134,7 +134,7 @@ int main()
         {
             printf("philosopher[%d]: I'm alive\n", i);
 
-            sleep(BEGIN_TIME); //sleep for 2 sec after init
+            sleep(beginTime); //sleep for 2 sec after init
 
             int countMeals = 0;
 
