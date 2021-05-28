@@ -22,6 +22,11 @@ pthread_mutex_t mutex; //mutex locker
 
 pthread_mutex_t mutexForFork[NUM_PHIL];
 
+struct philoStruct
+{
+    int id;
+};
+
 // FUNCTIONS //
 void grab_forks(int philo_id)
 {
@@ -62,8 +67,12 @@ void eating(int id) //print msg that philosopher is eating
     sleep(EAT_TIME);
 }
 
-void *philosopher(void *id)
+void *philosopher(void *philoFromMain)
 {
+    struct philoStruct *philo = (struct philoStruct *)philoFromMain;
+
+    int id = philo->id;
+
     printf("philosopher[%d]: I'm alive\n", id);
 
     sleep(BEGIN_TIME);
@@ -101,7 +110,13 @@ int main()
     //create philosophers
     for (int i = 0; i < NUM_PHIL; i++)
     {
-        if (pthread_create(&philoThreads[i], NULL, philosopher, &i))
+        struct philoStruct *philo;
+
+        philo = malloc(sizeof(struct philoStruct));
+
+        philo->id = i;
+
+        if (pthread_create(&philoThreads[i], NULL, philosopher, philo))
         {
             printf("main: Error occured while creating threads\n");
             exit(1);
