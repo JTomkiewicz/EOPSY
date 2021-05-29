@@ -29,6 +29,7 @@ int canBeLocked[NUM_PHIL] = {0};
 struct philoStruct
 {
     int id;
+    int countMeals;
 };
 
 // FUNCTIONS //
@@ -91,32 +92,30 @@ void *philosopher(void *philoFromMain)
 {
     struct philoStruct *philo = (struct philoStruct *)philoFromMain;
 
-    int id = philo->id;
-
-    printf("philosopher[%d]: I'm alive\n", id);
+    printf("philosopher[%d]: I'm alive\n", philo->id);
 
     sleep(beginTime);
 
-    int countMeals = 0;
+    philo->countMeals = 0;
 
     while (1)
     {
-        thinking(id);
+        thinking(philo->id);
 
-        printf("philosopher[%d]: Trying to get forks\n", id);
-        grab_forks(id);
+        printf("philosopher[%d]: Trying to get forks\n", philo->id);
+        grab_forks(philo->id);
 
-        if (canBeLocked[id] == 1)
+        if (canBeLocked[philo->id] == 1)
         {
-            eating(id);
-            countMeals++;
+            eating(philo->id);
+            philo->countMeals++;
 
-            printf("philosopher[%d]: Ate %d meals. Trying to put away forks\n", id, countMeals);
-            put_away_forks(id);
+            printf("philosopher[%d]: Ate %d meals. Trying to put away forks\n", philo->id, philo->countMeals);
+            put_away_forks(philo->id);
         }
     }
 
-    pthread_cancel(philoThreads[id]);
+    pthread_cancel(philoThreads[philo->id]);
 }
 
 // MAIN //
