@@ -85,7 +85,6 @@ void eating(int id) //print msg that philosopher is eating
 {
     printf("philosopher[%d]: eating\n", id);
     sleep(eatTime);
-    ;
 }
 
 void *philosopher(void *philoFromMain)
