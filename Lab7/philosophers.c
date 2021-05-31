@@ -41,15 +41,11 @@ void grab_forks(int philo_id)
     pthread_mutex_lock(&mutex);
 
     //if success of locking left
-    if (pthread_mutex_trylock(&mutexForFork[philo_id]) == 0)
+    if (pthread_mutex_lock(&mutexForFork[philo_id]) == 0)
     {
-        pthread_mutex_lock(&mutexForFork[philo_id]);
-
         //if success of locking right
-        if (pthread_mutex_trylock(&mutexForFork[(philo_id + 1) % NUM_PHIL]) == 0)
+        if (pthread_mutex_lock(&mutexForFork[(philo_id + 1) % NUM_PHIL]) == 0)
         {
-            pthread_mutex_lock(&mutexForFork[(philo_id + 1) % NUM_PHIL]);
-
             //YES! philosopher can eat
             canBeLocked[philo_id] = 1;
         }
@@ -130,12 +126,20 @@ void *philosopher(void *philoFromMain)
 int main()
 {
     //initialize mutex object with DEFAULT values
-    pthread_mutex_init(&mutex, NULL);
+    if (pthread_mutex_init(&mutex, NULL) != 0)
+    {
+        printf("main: Error while mutex initialisation\n");
+        exit(1);
+    }
 
     for (int i = 0; i < NUM_PHIL; i++)
     {
         //initialize mutex object with DEFAULT values
-        pthread_mutex_init(&mutexForFork[i], NULL);
+        if (pthread_mutex_init(&mutexForFork[i], NULL) != 0)
+        {
+            printf("main: Error while mutexForFork initialisation\n");
+            exit(1);
+        }
     }
 
     //create philosophers
@@ -148,17 +152,18 @@ int main()
         //loop id is the philo id
         philo->id = i;
 
-        if (pthread_create(&philoThreads[i], NULL, philosopher, philo))
+        //create a new thread
+        if (pthread_create(&philoThreads[i], NULL, philosopher, philo) != 0)
         {
             printf("main: Error occured while creating threads\n");
             exit(1);
         }
     }
 
-    //join threads
+    //waits for the thread to terminate
     for (int i = 0; i < NUM_PHIL; i++)
     {
-        if (pthread_join(philoThreads[i], NULL))
+        if (pthread_join(philoThreads[i], NULL) != 0)
         {
             printf("main: Error occured while joining threads\n");
             exit(1);
@@ -168,7 +173,7 @@ int main()
     //destroy mutex object and release sources
     for (int i = 0; i < NUM_PHIL; i++)
     {
-        if (pthread_mutex_destroy(&mutexForFork[i]) == -1)
+        if (pthread_mutex_destroy(&mutexForFork[i]) != 0)
         {
             printf("main: Error occured while mutex destruction\n");
             exit(1);
