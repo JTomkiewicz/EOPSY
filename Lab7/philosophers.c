@@ -20,7 +20,7 @@ pthread_t philoThreads[NUM_PHIL]; //thread identifiers
 
 pthread_mutex_t mutex; //mutex locker
 
-pthread_mutex_t mutexForFork[NUM_PHIL];
+pthread_mutex_t mutexForFork[NUM_PHIL]; //one fork = one mutex
 
 //int that can be 1 (if fork can be locked) and 0 (if not)
 int canBeLocked[NUM_PHIL] = {0};
@@ -28,7 +28,9 @@ int canBeLocked[NUM_PHIL] = {0};
 //this is the philosopher structure
 struct philoStruct
 {
+    //that stores identifier of philo
     int id;
+    //and nr of meals that he ate
     int countMeals;
 };
 
@@ -41,9 +43,13 @@ void grab_forks(int philo_id)
     //if success of locking left
     if (pthread_mutex_trylock(&mutexForFork[philo_id]) == 0)
     {
+        pthread_mutex_lock(&mutexForFork[philo_id]);
+
         //if success of locking right
         if (pthread_mutex_trylock(&mutexForFork[(philo_id + 1) % NUM_PHIL]) == 0)
         {
+            pthread_mutex_lock(&mutexForFork[(philo_id + 1) % NUM_PHIL]);
+
             //YES! philosopher can eat
             canBeLocked[philo_id] = 1;
         }
@@ -68,10 +74,10 @@ void grab_forks(int philo_id)
 
 void put_away_forks(int philo_id)
 {
-    //left
+    //release left fork
     pthread_mutex_unlock(&mutexForFork[philo_id]);
 
-    //right
+    //release right fork
     pthread_mutex_unlock(&mutexForFork[(philo_id + 1) % NUM_PHIL]);
 }
 
@@ -89,14 +95,17 @@ void eating(int id) //print msg that philosopher is eating
 
 void *philosopher(void *philoFromMain)
 {
+    //create philo struct
     struct philoStruct *philo = (struct philoStruct *)philoFromMain;
 
     printf("philosopher[%d]: I'm alive\n", philo->id);
 
-    sleep(beginTime);
-
+    //count meals in 0
     philo->countMeals = 0;
 
+    sleep(beginTime);
+
+    //infinite loop (this is the philosopher life)
     while (1)
     {
         thinking(philo->id);
@@ -120,21 +129,23 @@ void *philosopher(void *philoFromMain)
 // MAIN //
 int main()
 {
-    //init mutex lock
+    //initialize mutex object with DEFAULT values
     pthread_mutex_init(&mutex, NULL);
 
     for (int i = 0; i < NUM_PHIL; i++)
     {
-        pthread_mutex_init(&mutexForFork[i], NULL); //init mutex lock for mutexes in array
+        //initialize mutex object with DEFAULT values
+        pthread_mutex_init(&mutexForFork[i], NULL);
     }
 
     //create philosophers
     for (int i = 0; i < NUM_PHIL; i++)
     {
+        //create new structure in C
         struct philoStruct *philo;
-
         philo = malloc(sizeof(struct philoStruct));
 
+        //loop id is the philo id
         philo->id = i;
 
         if (pthread_create(&philoThreads[i], NULL, philosopher, philo))
@@ -154,7 +165,7 @@ int main()
         }
     }
 
-    //destroy mutexes
+    //destroy mutex object and release sources
     for (int i = 0; i < NUM_PHIL; i++)
     {
         if (pthread_mutex_destroy(&mutexForFork[i]) == -1)
