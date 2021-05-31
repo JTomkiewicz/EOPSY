@@ -28,20 +28,23 @@ void grab_forks(int left_fork_id)
 {
     struct sembuf operation[2];
 
-    //two forks for philosopher
+    //semaphore number
     operation[0].sem_num = left_fork_id;
     operation[1].sem_num = (left_fork_id + 1) % NUM_PHIL;
 
+    //semaphore operation
     operation[0].sem_op = -1;
     operation[1].sem_op = -1;
 
-    //no additional flags
+    //operation flags
     operation[0].sem_flg = 0;
     operation[1].sem_flg = 0;
 
+    //on failure semop returns -1, on success 0
     if (semop(semaphoreKey, operation, 2) == -1)
     {
         printf("Error: semop error in grab_forks\n");
+        exit(1);
     }
 }
 
@@ -49,20 +52,23 @@ void put_away_forks(int left_fork_id)
 {
     struct sembuf operation[2];
 
-    //two forks for philosopher
+    //semaphore number
     operation[0].sem_num = left_fork_id;
     operation[1].sem_num = (left_fork_id + 1) % NUM_PHIL;
 
+    //semaphore operation
     operation[0].sem_op = 1;
     operation[1].sem_op = 1;
 
-    //no additional flags
+    //operation flags
     operation[0].sem_flg = 0;
     operation[1].sem_flg = 0;
 
+    //on failure semop returns -1, on success 0
     if (semop(semaphoreKey, operation, 2) == -1)
     {
         printf("Error: semop error in put_away_forks\n");
+        exit(1);
     }
 }
 
@@ -92,9 +98,9 @@ void eating(int id) //print msg that philosopher is eating
 int main()
 {
     //create semaphore key
-    semaphoreKey = semget(IPC_PRIVATE, NUM_PHIL, 0644 | IPC_CREAT);
+    semaphoreKey = semget(IPC_PRIVATE, NUM_PHIL, 0666 | IPC_CREAT);
 
-    //check if error occured
+    //check if semget failure
     if (semaphoreKey == -1)
     {
         printf("main: Error duting semger\n");
