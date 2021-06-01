@@ -18,8 +18,6 @@ int eatTime = 2;
 
 pthread_t philoThreads[NUM_PHIL]; //thread identifiers
 
-pthread_mutex_t mutex; //mutex locker
-
 pthread_mutex_t mutexForFork[NUM_PHIL]; //one fork = one mutex
 
 //int that can be 1 (if fork can be locked) and 0 (if not)
@@ -37,9 +35,6 @@ struct philoStruct
 // FUNCTIONS //
 void grab_forks(int philo_id)
 {
-    //lock mutex
-    pthread_mutex_lock(&mutex);
-
     //if success of locking left
     if (pthread_mutex_lock(&mutexForFork[philo_id]) == 0)
     {
@@ -63,9 +58,6 @@ void grab_forks(int philo_id)
         //NO :( philosopher must think
         canBeLocked[philo_id] = 0;
     }
-
-    //unlock mutex
-    pthread_mutex_unlock(&mutex);
 }
 
 void put_away_forks(int philo_id)
@@ -125,13 +117,6 @@ void *philosopher(void *philoFromMain)
 // MAIN //
 int main()
 {
-    //initialize mutex object with DEFAULT values
-    if (pthread_mutex_init(&mutex, NULL) != 0)
-    {
-        printf("main: Error while mutex initialisation\n");
-        exit(1);
-    }
-
     for (int i = 0; i < NUM_PHIL; i++)
     {
         //initialize mutex object with DEFAULT values
