@@ -57,6 +57,7 @@ void readWrite(int sF, int dF) //use read write functions
     {
         errorOccured = 0;
 
+        //write characters from sourceFile
         if ((count = read(sF, buf, 1024)) == -1)
         {
             closeFiles(sF, dF, 1); //close files with error
@@ -64,6 +65,7 @@ void readWrite(int sF, int dF) //use read write functions
             break;
         }
 
+        //write characters to destinationFile
         if (write(dF, buf, count) == -1)
         {
             closeFiles(sF, dF, 2); //close files with error
@@ -71,6 +73,7 @@ void readWrite(int sF, int dF) //use read write functions
             break;
         }
 
+        //everything is fine, no errors
         if (errorOccured == 0)
         {
             closeFiles(sF, dF, 0);
