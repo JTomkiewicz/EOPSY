@@ -10,6 +10,7 @@
 
 void closeFiles(int sF, int dF, int errorID) //close open files
 {
+    //errors switch, by default (0) nothing is displayed
     switch (errorID)
     {
     case 1:
@@ -84,36 +85,44 @@ void memoryMap(int sF, int dF) //map files to memory region
 {
     off_t fileOffset;
 
+    //reposition read/write file offset
     if ((fileOffset = lseek(sF, 0, SEEK_END)) == -1)
     {
         closeFiles(sF, dF, 3);
         return;
     }
 
+    //map files (sourceFile)
     char *sfData = mmap(NULL, fileOffset, PROT_READ, MAP_PRIVATE, sF, 0);
 
+    //failure of mmap
     if (sfData == MAP_FAILED)
     {
         closeFiles(sF, dF, 4);
         return;
     }
 
+    //truncate file to specified length
     if (ftruncate(dF, fileOffset) == -1)
     {
         closeFiles(sF, dF, 5);
         return;
     }
 
+    //map files (destinationFile)
     char *dfData = mmap(NULL, fileOffset, PROT_WRITE | PROT_READ, MAP_SHARED, dF, 0);
 
+    //failure of mmap
     if (dfData == MAP_FAILED)
     {
         closeFiles(sF, dF, 6);
         return;
     }
 
+    //copy from source to destination
     memcpy(dfData, sfData, fileOffset);
 
+    //unmap mapped files
     munmap(sfData, fileOffset);
     munmap(dfData, fileOffset);
 
@@ -126,7 +135,7 @@ void memoryMap(int sF, int dF) //map files to memory region
 
 int main(int argc, char *argv[])
 {
-    int option, useReadWrite = 1;
+    int option, useReadWrite = 1; //by default program uses read write
 
     //process command line options and arguments
     while ((option = getopt(argc, argv, ":hm")) != -1) //-1 if there are no more options
@@ -149,6 +158,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    //two arguments are needed: file to copy from and paste to
     if (argc - optind < 2)
     {
         printf("Incorrect number of given arguments. Use -h for help.\n");
@@ -156,7 +166,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    //open file to COPY FROM
+    //open file to copy from
     int sourceFile;
 
     if ((sourceFile = open(argv[optind], O_RDONLY)) == -1)
@@ -166,13 +176,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    //open file to PASTE TO
     int destinationFile;
 
+    //open file to paste to
     if ((destinationFile = open(argv[1 + optind], O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)) == -1)
     {
         printf("Error occured while opening destiantion file. Use -h for help.\n");
-
         return 1;
     }
 
