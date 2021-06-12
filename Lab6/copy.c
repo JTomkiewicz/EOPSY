@@ -6,15 +6,17 @@
 #include <stdio.h>
 
 // FUNCTIONS //
-void readWrite(int sourceFile, int destinationFile) //use read write functions
+void readWrite(int sF, int dF) //use read write functions
+{
+    //copies chars will be placed in buffer
+    char buffer[1024];
+}
+
+void memoryMap(int sF, int dF) //map files to memory region
 {
 }
 
-void memoryMap(int sourceFile, int destinationFile) //map files to memory region
-{
-}
-
-void closeFiles(int sourceFile, int destinationFile, int errorID) //close open files
+void closeFiles(int sF, int dF, int errorID) //close open files
 {
     switch (errorID)
     {
@@ -25,12 +27,12 @@ void closeFiles(int sourceFile, int destinationFile, int errorID) //close open f
     }
 
     //close files
-    if (close(sourceFile) == -1)
+    if (close(sF) == -1)
     {
         printf("Error occured while closing source file. Use -h for help.\n");
     }
 
-    if (close(destinationFile) == -1)
+    if (close(dF) == -1)
     {
         printf("Error occured while closing source file. Use -h for help.\n");
     }
