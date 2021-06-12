@@ -9,11 +9,37 @@
 void readWrite(int sF, int dF) //use read write functions
 {
     //copies chars will be placed in buffer
-    char buffer[1024];
+    char buf[1024];
+    int count, errorOccured = 0;
+
+    while (true)
+    {
+        errorOccured = 0;
+
+        if ((count = read(sF, buf, 1024)) == -1)
+        {
+            closeFiles(sF, dF, 1); //close files with error
+            errorOccured = 1;
+            break;
+        }
+
+        if (write(dF, buf, count) == -1)
+        {
+            closeFiles(sF, dF, 2); //close files with error
+            errorOccured = 1;
+            break;
+        }
+
+        if (errorOccured == 0)
+            break;
+    }
+
+    closeFiles(sF, dF, 0); //close files without error
 }
 
 void memoryMap(int sF, int dF) //map files to memory region
 {
+    closeFiles(sF, dF, 0); //close files without error
 }
 
 void closeFiles(int sF, int dF, int errorID) //close open files
@@ -21,6 +47,10 @@ void closeFiles(int sF, int dF, int errorID) //close open files
     switch (errorID)
     {
     case 1:
+        printf("Eror occured in readWrite func during reading.\n");
+        break;
+    case 2:
+        printf("Eror occured in readWrite func during writing.\n");
         break;
     default:
         break;
@@ -62,6 +92,13 @@ int main(int argc, char *argv[])
 
             return 1;
         }
+    }
+
+    if (argc - optind < 2)
+    {
+        printf("Incorrect number of given arguments. Use -h for help.\n");
+
+        return 1;
     }
 
     //open file to COPY FROM
