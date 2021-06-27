@@ -1,1 +1,1 @@
-# EOPSY-Lab
+# Operating Systems
